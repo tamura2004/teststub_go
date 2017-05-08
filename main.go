@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/go-martini/martini"
 	"github.com/k0kubun/pp"
@@ -47,15 +48,16 @@ func main() {
 		switch p.errorCode {
 		case 1001, 1002, 1003:
 			w.Header().Set("Content-Type", "text/plain")
-			w.Header().Set("Content-Disposition", "filename*=ダウンロードエラー_yyyyMMddHHmmss.txt")
+			baseName := url.QueryEscape("ダウンロードエラー")
+			timestamp := time.Now().Format("20060102150405")
+			filename := fmt.Sprintf("%s_%s.txt", baseName, timestamp)
+			w.Header().Set("Content-Disposition", fmt.Sprintf("filename*=''%s", filename))
 			w.WriteHeader(p.Status())
 
 		default:
 			w.Header().Set("Content-Type", "application/pdf")
 			w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename*=''%s", p.FileName()))
 			w.WriteHeader(200)
-			pp.Print(p)
-			pp.Print(w)
 		}
 
 		return p.message
